@@ -1,0 +1,6 @@
+# Path: ''  #  The path for the user name.
+UserName: 'na-arxiv' # [REQUIRED] The name of the user to create.
+# PermissionsBoundary: '' # The ARN of the managed policy that is used to set the permissions boundary for the user.
+# Tags: # A list of tags that you want to attach to the new user.
+# - Key: ''  # [REQUIRED] The key name that can be used to look up or retrieve the associated value.
+  # Value: '' # [REQUIRED] The value associated with this tag.

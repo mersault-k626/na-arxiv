@@ -1,0 +1,5 @@
+ipykernel
+pyarrow
+pandas
+python-dotenv
+s3fs
