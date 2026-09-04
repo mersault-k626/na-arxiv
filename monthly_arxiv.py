@@ -8,9 +8,13 @@ import pyarrow.fs as fs
 import pyarrow.compute as pc
 import time
 import os
+import datetime as dt
 
-BACKFILL_RANGE = ('2024-01-01', '2026-06-30')
-quarters = pd.period_range(start=BACKFILL_RANGE[0], end=BACKFILL_RANGE[1], freq='Q')
+
+today = dt.date.today()
+last_day = today.replace(day=1) - dt.timedelta(days=1)
+first_day = last_day.replace(day=1)
+BACKFILL_RANGE = (first_day.isoformat(), last_day.isoformat())
 
 BASE_URL = "http://export.arxiv.org/api/query?"
 HEADERS = {"User-Agent": "MyArxivClient/1.0 (martyshort52@gmail.com)"}
@@ -50,27 +54,22 @@ def fetch_page(q, start, retries=10):
                 continue
             raise
 
-# loop over each quarter so a long backfill doesn't ride on one giant date range
-entries = []
-for quarter in quarters:
-    q_start = quarter.start_time.strftime('%Y%m%d%H%M')
-    q_end = quarter.end_time.strftime('%Y%m%d%H%M')
-    q = f'all:"information retrieval" AND submittedDate:[{q_start} TO {q_end}]'
+q_start = first_day.strftime('%Y%m%d%H%M')
+q_end = last_day.strftime('%Y%m%d%H%M')
+q = f'all:"information retrieval" AND submittedDate:[{q_start} TO {q_end}]'
 
-    root = fetch_page(q, 0)
-    total_results = int(root.find('opensearch:totalResults', ns).text)
-    quarter_entries = root.findall('atom:entry', ns)
+root = fetch_page(q, 0)
+total_results = int(root.find('opensearch:totalResults', ns).text)
+entries = root.findall('atom:entry', ns)
 
-    start = PAGE_SIZE
-    while start < total_results:
-        time.sleep(3)
-        page_root = fetch_page(q, start)
-        quarter_entries.extend(page_root.findall('atom:entry', ns))
-        start += PAGE_SIZE
+start = PAGE_SIZE
+while start < total_results:
+    time.sleep(3)
+    page_root = fetch_page(q, start)
+    entries.extend(page_root.findall('atom:entry', ns))
+    start += PAGE_SIZE
 
-    print(f"{quarter}: {len(quarter_entries)}/{total_results} entries")
-    entries.extend(quarter_entries)
-    time.sleep(5)
+print(f"{first_day} to {last_day}: {len(entries)}/{total_results} entries")
 
 #create empty list
 ids, titles, authors, categories, abstracts, published, urls = [], [], [], [], [], [], []
@@ -120,6 +119,13 @@ table = table.sort_by([('published', 'ascending')])
 s3_filesystem = fs.S3FileSystem(region= "ap-southeast-1")
 
 s3_path = "arvix-db/raw-arxiv/raw-arvix-entries.parquet"
+
+# append to existing backfill instead of overwriting it
+existing_file_info = s3_filesystem.get_file_info(s3_path)
+if existing_file_info.type != fs.FileType.NotFound:
+    existing_table = pq.read_table(s3_path, filesystem=s3_filesystem)
+    table = pa.concat_tables([existing_table, table])
+    table = table.sort_by([('published', 'ascending')])
 
 pq.write_table(table, s3_path, filesystem=s3_filesystem)
 

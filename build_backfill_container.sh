@@ -10,3 +10,4 @@ docker run -d -t --env-file .env --name arxiv-backfill-container arxiv-backfill-
 
 # real time reporting
 docker logs -f arxiv-backfill-container
+

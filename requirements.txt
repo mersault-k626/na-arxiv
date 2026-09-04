@@ -3,3 +3,4 @@ pyarrow
 pandas
 python-dotenv
 s3fs
+schedule
