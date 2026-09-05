@@ -2,7 +2,7 @@ name: arxiv api monthly scrape
 
 on:
   schedule:
-    - cron: '11 11 * * *'
+    - cron: '30 12 * * *'
 
 jobs:
   monthly:
