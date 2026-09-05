@@ -1,5 +1,7 @@
 # Workflow syntax for GitHub Actions
 
+full: https://docs.github.com/en/actions/reference/workflows-and-actions/workflow-syntax
+
 A workflow is a configurable automated process made up of one or more jobs. You must create a YAML file to define your workflow configuration.
 
 ## About YAML syntax for workflows
