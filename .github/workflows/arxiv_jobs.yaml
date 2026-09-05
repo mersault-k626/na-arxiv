@@ -1,0 +1,24 @@
+name: arxiv api monthly scrape
+
+on:
+  schedule:
+    - cron: '30 10 * * *'
+
+jobs:
+  monthly:
+    name: arxiv monthly run
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: build monthly image
+        working-directory: monthly-job
+        run: docker build -t arxiv-monthly-image .
+
+      - name: run monthly job
+        working-directory: monthly-job
+        env:
+          AWS_DOT_ENV: ${{ secrets.AWS_DOT_ENV }}
+        run: |
+          printf '%s\n' "$AWS_DOT_ENV" > .env
+          docker run --env-file .env --name arxiv-monthly-container arxiv-monthly-image

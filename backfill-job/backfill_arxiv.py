@@ -120,6 +120,6 @@ pq.write_table(table, s3_path, filesystem=s3_filesystem)
 
 file_info = s3_filesystem.get_file_info(s3_path)
 if file_info.type != fs.FileType.NotFound:
-    print(f"Backfill completed. raw-arvix-entries.parquet has been uploaded to s3://{s3_path}")
+    print(f"Backfill completed. raw-arvix-entries.parquet has been uploaded to s3://{s3_path} for data up to {cutoff}")
 else:
     print(f"Backfill failed. raw-arvix-entries.parquet not found at s3://{s3_path}")
