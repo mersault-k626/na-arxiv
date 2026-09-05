@@ -2,7 +2,8 @@ name: arxiv api monthly scrape
 
 on:
   schedule:
-    - cron: '30 12 * * *'
+    - cron: '00 14 * * *'
+  workflow_dispatch:
 
 jobs:
   monthly:
