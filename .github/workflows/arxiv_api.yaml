@@ -1,0 +1,10 @@
+name: arxiv api monthly scrape
+
+on:
+  schedule:
+    - cron: '0 6 1 * *'
+
+jobs:
+  monthly:
+    name: arxiv monthly run
+    runs-on: ubuntu-latest
